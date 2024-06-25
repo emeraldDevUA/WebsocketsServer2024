@@ -14,21 +14,19 @@ export class XmlManager{
             }
 
             // Convert the result to a JSON object
-            const json = JSON.stringify(result, null, 4);
 
-            // Log the JSON object
+
+            const json = JSON.stringify(result, null, 4);
             console.log(json);
 
-            // Access elements from the JSON object
-            // const to = result.note.to[0];
-            // const from = result.note.from[0];
-            // const heading = result.note.heading[0];
-            // const body = result.note.body[0];
-            //
-            // console.log(`To: ${to}`);
-            // console.log(`From: ${from}`);
-            // console.log(`Heading: ${heading}`);
-            // console.log(`Body: ${body}`);
+            if(result.loginTask != null){
+                console.log(`e-mail: ${result.loginTask.gmail}`);
+                console.log(`name : ${result.loginTask.NickName}`);
+                console.log(`encrypted password: ${result.loginTask.password}`);
+            }
+
+
+
         });
 
 
