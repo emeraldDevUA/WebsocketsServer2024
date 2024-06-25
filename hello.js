@@ -1,5 +1,6 @@
 import { WebSocketServer } from 'ws';
 import { MongoManager } from './DB/MongoManager.js'
+import  {XmlManager} from "./XML/XmlManager.js";
 
 let mongo_reference = new MongoManager();
 
@@ -9,7 +10,9 @@ wss.on('connection', function connection(ws) {
 
     ws.on('message', function message(data) {
         console.log('received: %s', data);
+        new XmlManager().processXML(data);
+        ws.send("I received your package. 200")
     });
 
-    ws.send('something');
+   // ws.send('something');
 });

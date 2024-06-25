@@ -29,14 +29,50 @@ const game_session =
         player_list: Array
     })
 
+const player =
+    new Schema({
+       username: String,
+       password: String,
+       reg_date: Date,
+       country : ObjectId,
+       is_online: Boolean,
+       is_banned: Boolean,
+       achievements_id: ObjectId
+    });
+
+const game_status =
+    new Schema({
+       status_name: String,
+       hp: Number,
+       position: Array
+    });
+
+const game_vehicle =
+    new Schema({
+       vehicle_name:String,
+       vehicle_camo:String
+    });
+
+const vehicles =
+    new Schema({
+        player_id:  ObjectId,
+        vehicle_id: ObjectId,
+    });
+
+
 export class MongoManager{
 
 
     constructor() {
 
-        mongoose.connect(conn_url, { })
-            .then(() => console.log('MongoDB connected'))
-            .catch(err => console.log(err));
+        // mongoose.connect(conn_url, { })
+        //     .then(function (){
+        //
+        //
+        //
+        //
+        //     })
+        //     .catch(err => console.log(err));
 
 
     }
@@ -48,5 +84,8 @@ export class MongoManager{
      updateDocuments(){}
 
 
+    load_default_values(){
+
+    }
 
 }
