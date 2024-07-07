@@ -7,6 +7,7 @@ let _1vAllRooms = [new _1VAll_Room(maxRooms)];
 let _DefenceRooms = [new DefenceRoom(maxRooms*2)];
 let _TeamRooms = [new TeamRoom(maxRooms)];
 
+
 export class XmlManager{
 
     constructor() {
@@ -28,7 +29,8 @@ export class XmlManager{
 
                 console.log(`name : ${result.loginTask.name}`);
                 console.log(`encrypted password: ${result.loginTask.password}`);
-                mongo_reference.checkLogin(result.loginTask.name[0], result.loginTask.password[0]);
+                mongo_reference.checkLogin(result.loginTask.name[0], result.loginTask.password[0], ws_instance);
+
             }
 
             if (result.registerTask != null) {
@@ -53,7 +55,8 @@ export class XmlManager{
 
                 switch (result.gameStartTask.selectedGameMode[0]) {
                     case '1 VS ALL':
-
+                        _1vAllRooms[0].add_player(result.gameStartTask.name[0]);
+                        _1vAllRooms[0].showStats();
                         ws_instance.send("Room-id: 1VA_1");
                         break;
                     case 'Team':
@@ -62,10 +65,17 @@ export class XmlManager{
                         console.log(result.gameStartTask.name[0]);
                         _TeamRooms[0].add_player(result.gameStartTask.name[0]);
                         _TeamRooms[0].showStats();
+
+                        if(_TeamRooms[0].isReady()){
+
+                        }
+
                         break;
                     case 'Defence':
-
+                        _DefenceRooms[0].add_player(result.gameStartTask.name[0]);
+                        _DefenceRooms[0].showStats();
                         ws_instance.send("Room-id: D_1");
+
                         break;
                 }
 

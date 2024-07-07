@@ -20,14 +20,22 @@ export class GameRoom{
     add_player(player){
         // this.players.push(player);
         GameRoom.mongo_reference.createNewGameSession("Teams");
-
+        this.currentPlayer++;
     }
 
     showStats(){
 
     }
 
+    isReady(){
+        return this.currentPlayer >= this.playerLimit;
+    }
 
+    gameStart(){
+        // find all the players in the game and send data
+        //
+
+    }
 
 }
 

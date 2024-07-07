@@ -74,6 +74,7 @@ const _game_session = mongoose.model('game_session',game_session);
 const _game_vehicle = mongoose.model('game_vehicle', game_vehicle);
 const _vehicles = mongoose.model('vehicles', vehicles);
 
+export const online_users = new Map();
 export class MongoManager{
 
 
@@ -139,11 +140,12 @@ export class MongoManager{
             });
 
     }
-    checkLogin(name, password){
+    checkLogin(name, password, socket_session){
         _player.find({username: name, password: password},{},null)
             .then(async players => {
                 console.log(players);
                 await this.setUserState(name, true);
+                online_users.set(name, socket_session);
             })
             .catch(err=>{
                 console.log(err);
