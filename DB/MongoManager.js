@@ -53,7 +53,7 @@ const game_status =
 
 const game_vehicle =
     new Schema({
-       vehicle_name:String,
+       vehicle_name:{type:String, unique:true},
        //vehicle_camo:String
     });
 
@@ -103,7 +103,17 @@ export class MongoManager{
 
      updateDocuments(){}
 
+    async fetchCountryId(country_name) {
 
+        await _country.findOne({name: country_name}, {}, null)
+            .then(country => {
+                return country._id;
+            })
+            .catch(err => {
+                console.log(err);
+            })
+
+    }
 
 
     registerUser(name, gmail, password, country){
@@ -129,7 +139,6 @@ export class MongoManager{
             });
 
     }
-
     checkLogin(name, password){
         _player.find({username: name, password: password},{},null)
             .then(async players => {
@@ -153,7 +162,7 @@ export class MongoManager{
                 .then(doc=>{
                     console.log(doc);
                 })
-                .catch(err =>{
+                .catch(() =>{
                   console.log("Duplicate country");
                 });
 
@@ -184,6 +193,19 @@ export class MongoManager{
 
     }
 
+    createNewGameSession(game_mode){
+        _game_mode.findOne({name: game_mode},{}, null)
+            .then(doc =>{
 
+                let gs = new _game_session({
+                    game_mode_id: doc._id,
+                    player_list: []
+                });
+                gs.save({})
+                    .then()
+                    .catch();
+            })
+
+    }
 
 }

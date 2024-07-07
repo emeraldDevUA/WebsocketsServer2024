@@ -17,4 +17,12 @@ wss.on('connection', function connection(ws) {
         xml_manager.processXML(data, mongo_reference, ws);
         ws.send("I received your package. 200");
     });
+
+    ws.on('close', (code, reason) => {
+        console.log('Client disconnected:', code);
+    });
+
+
+
 });
+
