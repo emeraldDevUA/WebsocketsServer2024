@@ -19,7 +19,8 @@ export class GameRoom{
 
     add_player(player){
         // this.players.push(player);
-        GameRoom.mongo_reference.createNewGameSession("Teams");
+        // GameRoom.mongo_reference.createNewGameSession("Teams", "T_1");
+        GameRoom.mongo_reference.addPlayer( "T_1",player);
         this.currentPlayer++;
     }
 

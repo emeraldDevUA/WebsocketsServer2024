@@ -28,6 +28,7 @@ const game_mode =
 
 const game_session =
     new Schema({
+        name:{type:String, unique:true},
         game_mode_id: ObjectId,
         player_list: Array
     })
@@ -153,6 +154,21 @@ export class MongoManager{
 
 
     }
+
+
+    createNewGameSession(game_mode, session_name){
+        _game_mode.findOne({name: game_mode},{}, null)
+            .then(doc =>{
+
+                let gs = new _game_session({
+                    game_mode_id: doc._id,
+                    player_list: [],
+                    name: session_name
+                });
+                gs.save({}).then().catch();
+            })
+
+    }
     genSeeds(){
         const countries = ['Ukraine', 'Germany', 'Netherlands', 'Belgium', 'Poland'];
         const game_modes = ['1 VS ALL', 'Teams', 'Defence'];
@@ -165,7 +181,7 @@ export class MongoManager{
                     console.log(doc);
                 })
                 .catch(() =>{
-                  console.log("Duplicate country");
+                    console.log("Duplicate country");
                 });
 
         })
@@ -192,22 +208,65 @@ export class MongoManager{
                 });
 
         })
-
+       // this.createNewGameSession("Teams", "T_1");
     }
+    addPlayer(session_name, player_name){
+        _game_session.findOne({name:session_name},{}, null)
+            .then(doc => {
+                let tmp = doc.player_list;
+                tmp.push(player_name);
+                _game_session.findOneAndReplace(
+                    {name:session_name},
+                    {player_list: tmp},
+                    null)
 
-    createNewGameSession(game_mode){
-        _game_mode.findOne({name: game_mode},{}, null)
-            .then(doc =>{
+                    .then(folded_doc =>{
+                        console.log(folded_doc);
+                    }).catch();
 
-                let gs = new _game_session({
-                    game_mode_id: doc._id,
-                    player_list: []
-                });
-                gs.save({})
-                    .then()
-                    .catch();
+            })
+            .catch(err => {
+                console.log(err);
             })
 
     }
 
+    gameStartMethod(room_name){
+        // idk what params are supposed to be here
+        _game_session.findOne({name: room_name}, {}, null)
+            .then(doc => {
+                let array = doc.player_list;
+                array.forEach((player_name) => {
+                    online_users.get(player_name).send("Game Has Just Started!");
+                    let gm_status = new _game_status({
+                        status_name: "Alive",
+                        hp: 100,
+                        position: [0,0,0],
+                        name: player_name
+                    });
+                    gm_status.save({}).then(r => console.log(r));
+                })
+            })
+            .catch()
+
+    }
+
+    gameFinishMethod(room_name){
+        let xml_doc;
+        _game_session.findOne({name: room_name}, {}, null)
+            .then(doc => {
+                let array = doc.player_list;
+                array.forEach((player_name) => {
+                    online_users.get(player_name).send("Game Has Just Finished!");
+
+                })
+            })
+            .catch()
+
+    }
+    shareGameData(room_name) {
+
+    }
+
+    
 }
