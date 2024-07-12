@@ -143,7 +143,7 @@ export class MongoManager{
             .then(async players => {
                 console.log(players);
                 await this.setUserState(name, true);
-                online_users.set(name, socket_session);
+                MongoManager.online_users.set(name, socket_session);
             })
             .catch(err=>{
                 console.log(err);
@@ -187,6 +187,13 @@ export class MongoManager{
             game_mode_instance.save()
                 .then(doc=>{
                     console.log(doc);
+                    if(game_mode_name === "Teams"){
+
+                        this.createNewGameSession("Teams", "T_1");
+                    } else if(game_mode_name === "Defence"){
+
+                        this.createNewGameSession("Defence", "D_1");
+                    }
                 })
                 .catch(err =>{
                     console.log("Duplicate game mode");
@@ -205,7 +212,7 @@ export class MongoManager{
                 });
 
         })
-       // this.createNewGameSession("Teams", "T_1");
+
     }
     addPlayer(session_name, player_name){
         _game_session.findOne({name:session_name},{}, null)
@@ -214,7 +221,7 @@ export class MongoManager{
                 tmp.push(player_name);
                 _game_session.findOneAndReplace(
                     {name:session_name},
-                    {player_list: tmp},
+                    {player_list: tmp, game_mode_id: doc.game_mode_id},
                     null)
 
                     .then(folded_doc =>{
@@ -232,9 +239,9 @@ export class MongoManager{
         // idk what params are supposed to be here
         _game_session.findOne({name: room_name}, {}, null)
             .then(doc => {
-                let array = doc.player_list;
+                let array = doc.player_list();
                 array.forEach((player_name) => {
-                    online_users.get(player_name).send("Game Has Just Started!");
+                    MongoManager.online_users.get(player_name).send("Game Has Just Started!");
                     let gm_status = new _game_status({
                         status_name: "Alive",
                         hp: 100,

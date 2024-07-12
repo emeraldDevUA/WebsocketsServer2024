@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import {MongoManager, online_users} from './DB/MongoManager.js'
+import {MongoManager} from './DB/MongoManager.js'
 import  {XmlManager} from "./XML/XmlManager.js";
 import {GameRoom} from "./GameRooms/GameRoom.js";
 
@@ -19,6 +19,7 @@ function deleteFromMapByValue(ws_i){
         if(key === ws_i){
             let name = MongoManager.online_users.get(key);
             mongo_reference.setUserState(name, false);
+            MongoManager.online_users.delete(name);
             break;
         }
 
@@ -35,7 +36,7 @@ wss.on('connection', function connection(ws) {
 
     ws.on('close', (code, reason) => {
         console.log('Client disconnected:', code);
-
+        deleteFromMapByValue(ws);
     });
 
 

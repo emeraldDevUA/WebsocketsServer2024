@@ -67,7 +67,7 @@ export class XmlManager{
                         _TeamRooms[0].showStats();
 
                         if(_TeamRooms[0].isReady()){
-
+                            mongo_reference.gameStartMethod("T_1");
                         }
 
                         break;
