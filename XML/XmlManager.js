@@ -91,5 +91,12 @@ export class XmlManager{
 
     }
 
+    sendXmlStartResponse(docs, ws_instance){
+
+    }
+
+    sendXmlBufferResponse(docs, ws_instance){
+
+    }
 
 }

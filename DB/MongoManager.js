@@ -75,9 +75,9 @@ const _game_session = mongoose.model('game_session',game_session);
 const _game_vehicle = mongoose.model('game_vehicle', game_vehicle);
 const _vehicles = mongoose.model('vehicles', vehicles);
 
-export const online_users = new Map();
-export class MongoManager{
 
+export class MongoManager{
+     static online_users = new Map();
 
     constructor() {
 
@@ -101,9 +101,6 @@ export class MongoManager{
                 console.error(err);
             })
     }
-     fetchDocuments(){}
-
-     updateDocuments(){}
 
     async fetchCountryId(country_name) {
 
