@@ -49,7 +49,11 @@ const game_status =
     new Schema({
        status_name: String,
        hp: Number,
-       position: Array
+       position: Array,
+       angles: Array,
+       turret_angles: Array,
+       gun_angles: Array,
+       player_name: String
     });
 
 const game_vehicle =
@@ -219,7 +223,7 @@ export class MongoManager{
             .then(doc => {
                 let tmp = doc.player_list;
                 tmp.push(player_name);
-                _game_session.findOneAndReplace(
+                _game_session.findOneAndUpdate(
                     {name:session_name},
                     {player_list: tmp, game_mode_id: doc.game_mode_id},
                     null)
@@ -255,22 +259,32 @@ export class MongoManager{
 
     }
 
+
     gameFinishMethod(room_name){
-        let xml_doc;
+        let xml_doc = [];
         _game_session.findOne({name: room_name}, {}, null)
             .then(doc => {
                 let array = doc.player_list;
                 array.forEach((player_name) => {
                     online_users.get(player_name).send("Game Has Just Finished!");
-
+                    xml_doc.push(doc);
                 })
             })
             .catch()
+            // synchronization primitive
+            while (xml_doc.length < 5);
 
+            return xml_doc;
     }
     shareGameData(room_name) {
 
     }
 
+    updateGameSession(coords, angles, player_name){
+        _game_status.findOneAndUpdate({player_name: player_name},
+            {position: coords,angles: angles}, null)
+            .then().catch()
+
+    }
     
 }

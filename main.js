@@ -4,12 +4,9 @@ import  {XmlManager} from "./XML/XmlManager.js";
 import {GameRoom} from "./GameRooms/GameRoom.js";
 
 
-let mongo_reference = new MongoManager();
-
+export const mongo_reference = new MongoManager();
 const wss = new WebSocketServer({ port: 8080 });
 const xml_manager = new XmlManager();
-
-GameRoom.mongo_reference = mongo_reference;
 
 function deleteFromMapByValue(ws_i){
     let keys = MongoManager.online_users.keys();
@@ -26,6 +23,7 @@ function deleteFromMapByValue(ws_i){
     }
 }
 
+GameRoom.mongo_reference = mongo_reference;
 
 wss.on('connection', function connection(ws) {
 
@@ -38,8 +36,6 @@ wss.on('connection', function connection(ws) {
         console.log('Client disconnected:', code);
         deleteFromMapByValue(ws);
     });
-
-
 
 });
 
