@@ -1,5 +1,7 @@
 import xml2js from "xml2js";
 import {_1VAll_Room, DefenceRoom, GameRoom, TeamRoom} from "../GameRooms/GameRoom.js";
+import { create } from 'xmlbuilder2';
+
 
 const maxRooms = 5;
 
@@ -58,6 +60,10 @@ export class XmlManager{
                         _1vAllRooms[0].add_player(result.gameStartTask.name[0]);
                         _1vAllRooms[0].showStats();
                         ws_instance.send("Room-id: 1VA_1");
+
+                        if(_1vAllRooms[0].isReady()){
+                            mongo_reference.gameStartMethod("T_1");
+                        }
                         break;
                     case 'Team':
 
@@ -76,16 +82,32 @@ export class XmlManager{
                         _DefenceRooms[0].showStats();
                         ws_instance.send("Room-id: D_1");
 
+                        _DefenceRooms[0].add_player(result.gameStartTask.name[0]);
+                        _DefenceRooms[0].showStats();
+                        if(_DefenceRooms[0].isReady()){
+                            mongo_reference.gameStartMethod("D_1");
+                        }
                         break;
                 }
 
 
             }
             if (result.gameBufferTask != null) {
-            // print properties
-            // and   redirect data to the room
 
-            }
+            let coords =
+                [result.gameBufferTask.X[0],
+                result.gameBufferTask.Y[0],
+                result.gameBufferTask.Z[0]]
+            let angles =
+                [result.gameBufferTask.angleX[0],
+                result.gameBufferTask.angleY[0],
+                result.gameBufferTask.angleZ[0]]
+
+            let room_id = result.gameBufferTask.room_id[0];
+            let player_name = result.gameBufferTask.name[0];
+
+            mongo_reference.updateGameSession(coords, angles, player_name)
+        }
         });
 
 
@@ -98,5 +120,7 @@ export class XmlManager{
     sendXmlBufferResponse(docs, ws_instance){
 
     }
+
+
 
 }
