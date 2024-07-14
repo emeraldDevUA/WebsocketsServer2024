@@ -118,7 +118,8 @@ export class XmlManager{
     }
 
     sendXmlBufferResponse(docs, ws_instance){
-
+        let xml_doc = create(docs).end({ prettyPrint: true });
+        ws_instance.send(xml_doc);
     }
 
 

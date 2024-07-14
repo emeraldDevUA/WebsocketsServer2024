@@ -96,7 +96,7 @@ export class MongoManager{
         this.genSeeds();
 
     }
-     setUserState(name, state){
+    setUserState(name, state){
         _player.findOneAndUpdate({name:name}, {isOnline: state}, {new: true})
             .then(doc => {
                 console.log(doc);
@@ -105,7 +105,6 @@ export class MongoManager{
                 console.error(err);
             })
     }
-
     async fetchCountryId(country_name) {
 
         await _country.findOne({name: country_name}, {}, null)
@@ -117,8 +116,6 @@ export class MongoManager{
             })
 
     }
-
-
     registerUser(name, gmail, password, country){
         // create new achievements document
         // fetch id of the country
@@ -155,8 +152,6 @@ export class MongoManager{
 
 
     }
-
-
     createNewGameSession(game_mode, session_name){
         _game_mode.findOne({name: game_mode},{}, null)
             .then(doc =>{
@@ -238,7 +233,6 @@ export class MongoManager{
             })
 
     }
-
     gameStartMethod(room_name){
         // idk what params are supposed to be here
         _game_session.findOne({name: room_name}, {}, null)
@@ -277,7 +271,22 @@ export class MongoManager{
             return xml_doc;
     }
     shareGameData(room_name) {
+        let xml_doc=[];
+        _game_session.findOne({name: room_name}, {}, null)
+            .then(doc => {
+                let array = doc.player_list();
+                array.forEach((player_name) => {
+                    _game_status.findOne({name: player_name}, {}, null)
+                        .then(pl_status =>{
+                            xml_doc.push(pl_status);
+                        }) .catch()
+                })
+            })
+            .catch()
+            while (xml_doc.length <= 5);
 
+            console.log(xml_doc);
+            return xml_doc;
     }
 
     updateGameSession(coords, angles, player_name){
