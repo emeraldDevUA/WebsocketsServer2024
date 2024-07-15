@@ -53,7 +53,8 @@ const game_status =
        angles: Array,
        turret_angles: Array,
        gun_angles: Array,
-      name: String
+       name: String,
+       team_name:String
     });
 
 const game_vehicle =
@@ -264,9 +265,13 @@ export class MongoManager{
                     online_users.get(player_name).send("Game Has Just Finished!");
                     xml_doc.push(doc);
                 })
+
+                //_game_session.deleteOne({name: room_name});
             })
             .catch()
             // synchronization primitive
+
+
             while (xml_doc.length < 5);
 
             return xml_doc;

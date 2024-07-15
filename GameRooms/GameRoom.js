@@ -6,7 +6,7 @@ export class GameRoom{
     gameModeName;
     roomState;
     currentPlayer = 0;
-    static user_docs;
+    static user_docs = [];
 
     constructor() {
         // awaiting
