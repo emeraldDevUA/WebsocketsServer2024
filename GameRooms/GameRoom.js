@@ -6,6 +6,7 @@ export class GameRoom{
     gameModeName;
     roomState;
     currentPlayer = 0;
+    static user_docs;
 
     constructor() {
         // awaiting
@@ -21,7 +22,7 @@ export class GameRoom{
         // this.players.push(player);
         // GameRoom.mongo_reference.createNewGameSession("Teams", "T_1");
         GameRoom.mongo_reference.addPlayer( "T_1",player);
-        this.currentPlayer++;
+        this.currentPlayer+=1;
     }
 
     showStats(){

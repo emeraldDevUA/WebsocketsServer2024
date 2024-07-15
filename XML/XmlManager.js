@@ -71,8 +71,9 @@ export class XmlManager{
                         console.log(result.gameStartTask.name[0]);
                         _TeamRooms[0].add_player(result.gameStartTask.name[0]);
                         _TeamRooms[0].showStats();
-
+                        console.log("I AM HERE");
                         if(_TeamRooms[0].isReady()){
+
                             mongo_reference.gameStartMethod("T_1");
                         }
 
@@ -92,6 +93,7 @@ export class XmlManager{
 
 
             }
+
             if (result.gameBufferTask != null) {
 
             let coords =
@@ -103,10 +105,12 @@ export class XmlManager{
                 result.gameBufferTask.angleY[0],
                 result.gameBufferTask.angleZ[0]]
 
-            let room_id = result.gameBufferTask.room_id[0];
+            // let room_id = result.gameBufferTask.nam[0];
             let player_name = result.gameBufferTask.name[0];
 
-            mongo_reference.updateGameSession(coords, angles, player_name)
+            mongo_reference.updateGameSession(coords, angles, player_name);
+
+            this.sendXmlBufferResponse(mongo_reference.shareGameData("T_1"), ws_instance);
         }
         });
 
@@ -119,6 +123,7 @@ export class XmlManager{
 
     sendXmlBufferResponse(docs, ws_instance){
         let xml_doc = create(docs).end({ prettyPrint: true });
+        console.log(xml_doc)
         ws_instance.send(xml_doc);
     }
 

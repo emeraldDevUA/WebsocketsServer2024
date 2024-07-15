@@ -53,7 +53,7 @@ const game_status =
        angles: Array,
        turret_angles: Array,
        gun_angles: Array,
-       player_name: String
+      name: String
     });
 
 const game_vehicle =
@@ -237,7 +237,8 @@ export class MongoManager{
         // idk what params are supposed to be here
         _game_session.findOne({name: room_name}, {}, null)
             .then(doc => {
-                let array = doc.player_list();
+                let array = doc.player_list;
+                console.log(doc.player_list);
                 array.forEach((player_name) => {
                     MongoManager.online_users.get(player_name).send("Game Has Just Started!");
                     let gm_status = new _game_status({
@@ -274,19 +275,21 @@ export class MongoManager{
         let xml_doc=[];
         _game_session.findOne({name: room_name}, {}, null)
             .then(doc => {
-                let array = doc.player_list();
+                let array = doc.player_list;
                 array.forEach((player_name) => {
                     _game_status.findOne({name: player_name}, {}, null)
                         .then(pl_status =>{
                             xml_doc.push(pl_status);
+                            console.log(pl_status);
                         }) .catch()
                 })
+
+
             })
             .catch()
-            while (xml_doc.length <= 5);
 
-            console.log(xml_doc);
-            return xml_doc;
+        return xml_doc;
+
     }
 
     updateGameSession(coords, angles, player_name){
