@@ -62,7 +62,7 @@ export class XmlManager{
                         ws_instance.send("Room-id: 1VA_1");
 
                         if(_1vAllRooms[0].isReady()){
-                            mongo_reference.gameStartMethod("T_1");
+                            mongo_reference.gameStartMethod("1VA_1");
                         }
                         break;
                     case 'Team':
@@ -71,7 +71,7 @@ export class XmlManager{
                         console.log(result.gameStartTask.name[0]);
                         _TeamRooms[0].add_player(result.gameStartTask.name[0]);
                         _TeamRooms[0].showStats();
-                        console.log("I AM HERE");
+
                         if(_TeamRooms[0].isReady()){
 
                             mongo_reference.gameStartMethod("T_1");
@@ -97,34 +97,28 @@ export class XmlManager{
             if (result.gameBufferTask != null) {
 
             let coords =
-                [result.gameBufferTask.X[0],
-                result.gameBufferTask.Y[0],
-                result.gameBufferTask.Z[0]]
+                [+result.gameBufferTask.X,
+                +result.gameBufferTask.Y,
+                +result.gameBufferTask.Z]
             let angles =
-                [result.gameBufferTask.angleX[0],
-                result.gameBufferTask.angleY[0],
-                result.gameBufferTask.angleZ[0]]
+                [+result.gameBufferTask.angleX,
+                +result.gameBufferTask.angleY,
+                +result.gameBufferTask.angleZ]
 
             // let room_id = result.gameBufferTask.nam[0];
             let player_name = result.gameBufferTask.name[0];
 
             mongo_reference.updateGameSession(coords, angles, player_name);
 
-            this.sendXmlBufferResponse(mongo_reference.shareGameData("T_1"), ws_instance);
+            (mongo_reference.shareGameData("T_1"));
         }
+            if(result.shellFiredTask != null){
+
+            }
+
         });
 
 
-    }
-
-    sendXmlStartResponse(docs, ws_instance){
-
-    }
-
-    sendXmlBufferResponse(docs, ws_instance){
-        let xml_doc = create(docs).end({ prettyPrint: true });
-        console.log(xml_doc)
-        ws_instance.send(xml_doc);
     }
 
 

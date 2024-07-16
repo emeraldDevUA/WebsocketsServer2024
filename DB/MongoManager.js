@@ -2,6 +2,7 @@ import mongoose, {Schema} from 'mongoose';
 import {ObjectId} from "mongodb";
 import {GameRoom} from "../GameRooms/GameRoom.js";
 
+
 const conn_url = 'mongodb://localhost:27017/tanksDB';
 
 
@@ -79,6 +80,8 @@ const _game_status = mongoose.model('game_status', game_status);
 const _game_session = mongoose.model('game_session',game_session);
 const _game_vehicle = mongoose.model('game_vehicle', game_vehicle);
 const _vehicles = mongoose.model('vehicles', vehicles);
+
+
 
 
 export class MongoManager{
@@ -246,9 +249,14 @@ export class MongoManager{
                         status_name: "Alive",
                         hp: 100,
                         position: [0,0,0],
-                        name: player_name
+                        name: player_name,
+                        turret_angles: [0,0,0],
+                        gun_angles: [0,0,0],
+                        team_name: "Team1"
                     });
-                    gm_status.save({}).then(r => console.log(r));
+                    gm_status.save({}).then(
+                        r => {}
+                    );
                 })
             })
             .catch()
@@ -262,7 +270,7 @@ export class MongoManager{
             .then(doc => {
                 let array = doc.player_list;
                 array.forEach((player_name) => {
-                    online_users.get(player_name).send("Game Has Just Finished!");
+                    MongoManager.online_users.get(player_name).send("Game Has Just Finished!");
                     xml_doc.push(doc);
                 })
 
@@ -272,20 +280,20 @@ export class MongoManager{
             // synchronization primitive
 
 
-            while (xml_doc.length < 5);
-
             return xml_doc;
     }
     shareGameData(room_name) {
-        let xml_doc=[];
         _game_session.findOne({name: room_name}, {}, null)
             .then(doc => {
                 let array = doc.player_list;
                 array.forEach((player_name) => {
                     _game_status.findOne({name: player_name}, {}, null)
                         .then(pl_status =>{
-                            xml_doc.push(pl_status);
                             console.log(pl_status);
+                            let pos = pl_status.position;
+                            let angles = pl_status.angles;
+                            let msg = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><gameBufferTask><X>${pos[0]}</X><Y>${pos[1]}/Y><Z>${pos[2]}</Z><angleX>${angles[0]}</angleX><angleY>${angles[1]}</angleY><angleZ>${angles[2]}</angleZ><name>${pl_status.name}</name></gameBufferTask>`;
+                            MongoManager.online_users.get(player_name).send(msg);
                         }) .catch()
                 })
 
@@ -293,12 +301,12 @@ export class MongoManager{
             })
             .catch()
 
-        return xml_doc;
+
 
     }
 
     updateGameSession(coords, angles, player_name){
-        _game_status.findOneAndUpdate({player_name: player_name},
+        _game_status.findOneAndUpdate({name: player_name},
             {position: coords,angles: angles}, null)
             .then().catch()
 

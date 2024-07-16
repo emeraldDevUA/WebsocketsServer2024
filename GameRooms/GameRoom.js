@@ -5,7 +5,7 @@ export class GameRoom{
     playerLimit;
     gameModeName;
     roomState;
-    currentPlayer = 0;
+    currentPlayer = 5;
     static user_docs = [];
 
     constructor() {
