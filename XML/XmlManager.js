@@ -1,23 +1,26 @@
 import xml2js from "xml2js";
-import {_1VAll_Room, DefenceRoom, GameRoom, TeamRoom} from "../GameRooms/GameRoom.js";
-import { create } from 'xmlbuilder2';
+import {_1VAll_Room, DefenceRoom, TeamRoom} from "../GameRooms/GameRoom.js";
 
 
 const maxRooms = 5;
 
 let _1vAllRooms = [new _1VAll_Room(maxRooms)];
-let _DefenceRooms = [new DefenceRoom(maxRooms*2)];
+let _DefenceRooms = [new DefenceRoom(maxRooms * 2)];
 let _TeamRooms = [new TeamRoom(maxRooms)];
 
 
-export class XmlManager{
+export class XmlManager {
 
     constructor() {
-
+        for (let i = 0; i < maxRooms; i++) {
+            _1vAllRooms.push(new _1VAll_Room(maxRooms));
+            _DefenceRooms.push(new DefenceRoom(maxRooms * 2));
+            _TeamRooms.push(new TeamRoom(maxRooms));
+        }
     }
 
 
-    async processXML(xml_document, mongo_reference, ws_instance){
+    async processXML(xml_document, mongo_reference, ws_instance) {
         const parser = new xml2js.Parser();
         // Parse the XML string
         parser.parseString(xml_document, async (err, result) => {
@@ -54,39 +57,57 @@ export class XmlManager{
                 console.log(`name: ${result.gameStartTask.name}`);
                 console.log(`vehicle : ${result.gameStartTask.vehicle}`);
                 console.log(`game mode: ${result.gameStartTask.selectedGameMode}`);
-
+                let index = 0;
                 switch (result.gameStartTask.selectedGameMode[0]) {
                     case '1 VS ALL':
-                        _1vAllRooms[0].add_player(result.gameStartTask.name[0]);
-                        _1vAllRooms[0].showStats();
-                        ws_instance.send("Room-id: 1VA_1");
+                        for (index; index < maxRooms; index++) {
+                            if (!_1vAllRooms[index].isRunning()) {
+                                break;
+                            }
+                        }
+                        _1vAllRooms[index].add_player(result.gameStartTask.name[0]);
+                        _1vAllRooms[index].showStats();
+                        ws_instance.send(`Room-id: 1VA_${index + 1}`);
 
-                        if(_1vAllRooms[0].isReady()){
-                            mongo_reference.gameStartMethod("1VA_1");
+                        if (_1vAllRooms[0].isReady()) {
+                            mongo_reference.gameStartMethod(`1VA_${index + 1}`);
                         }
                         break;
                     case 'Team':
-
-                        ws_instance.send("Room-id: T_1");
+                        for (index; index < maxRooms; index++) {
+                            if (!_1vAllRooms[index].isRunning()) {
+                                break;
+                            }
+                        }
+                        _1vAllRooms[index].add_player(result.gameStartTask.name[0]);
+                        _1vAllRooms[index].showStats();
+                        ws_instance.send(`Room-id: T_${index + 1}`);
                         console.log(result.gameStartTask.name[0]);
-                        _TeamRooms[0].add_player(result.gameStartTask.name[0]);
-                        _TeamRooms[0].showStats();
+                        _TeamRooms[index].add_player(result.gameStartTask.name[0]);
+                        _TeamRooms[index].showStats();
 
-                        if(_TeamRooms[0].isReady()){
-
-                            mongo_reference.gameStartMethod("T_1");
+                        if (_TeamRooms[index].isReady()) {
+                            mongo_reference.gameStartMethod(`T_${index + 1}`);
                         }
 
                         break;
                     case 'Defence':
-                        _DefenceRooms[0].add_player(result.gameStartTask.name[0]);
-                        _DefenceRooms[0].showStats();
-                        ws_instance.send("Room-id: D_1");
+                        for (index; index < maxRooms; index++) {
+                            if (!_1vAllRooms[index].isRunning()) {
+                                break;
+                            }
+                        }
+                        _1vAllRooms[index].add_player(result.gameStartTask.name[0]);
+                        _1vAllRooms[index].showStats();
+                        _DefenceRooms[index].add_player(result.gameStartTask.name[0]);
+                        _DefenceRooms[index].showStats();
 
-                        _DefenceRooms[0].add_player(result.gameStartTask.name[0]);
-                        _DefenceRooms[0].showStats();
-                        if(_DefenceRooms[0].isReady()){
-                            mongo_reference.gameStartMethod("D_1");
+                        ws_instance.send(`Room-id: D_${index + 1}`);
+
+                        _DefenceRooms[index].add_player(result.gameStartTask.name[0]);
+                        _DefenceRooms[index].showStats();
+                        if (_DefenceRooms[0].isReady()) {
+                            mongo_reference.gameStartMethod(`D_${index + 1}`);
                         }
                         break;
                 }
@@ -96,23 +117,28 @@ export class XmlManager{
 
             if (result.gameBufferTask != null) {
 
-            let coords =
-                [+result.gameBufferTask.X,
-                +result.gameBufferTask.Y,
-                +result.gameBufferTask.Z]
-            let angles =
-                [+result.gameBufferTask.angleX,
-                +result.gameBufferTask.angleY,
-                +result.gameBufferTask.angleZ]
+                let coords =
+                    [+result.gameBufferTask.X,
+                        +result.gameBufferTask.Y,
+                        +result.gameBufferTask.Z]
+                let angles =
+                    [+result.gameBufferTask.angleX,
+                        +result.gameBufferTask.angleY,
+                        +result.gameBufferTask.angleZ]
 
-            // let room_id = result.gameBufferTask.nam[0];
-            let player_name = result.gameBufferTask.name[0];
+                // let room_id = result.gameBufferTask.nam[0];
+                let player_name = result.gameBufferTask.name[0];
 
-            mongo_reference.updateGameSession(coords, angles, player_name);
+                mongo_reference.updateGameSession(coords, angles, player_name);
 
-            (mongo_reference.shareGameData("T_1"));
-        }
-            if(result.shellFiredTask != null){
+                (mongo_reference.shareGameData("T_1"));
+            }
+            if (result.shellFiredTask != null) {
+
+            }
+
+            if (result.messageSentTask != null) {
+
 
             }
 
@@ -120,7 +146,6 @@ export class XmlManager{
 
 
     }
-
 
 
 }

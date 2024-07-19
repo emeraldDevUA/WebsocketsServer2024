@@ -36,8 +36,24 @@ export class GameRoom{
     gameStart(){
         // find all the players in the game and send data
         //
-
+        this.roomState = "running";
     }
+
+    gameFinish(){
+        // find all the players in the game and send data
+        //
+        this.roomState = "awaiting";
+    }
+
+    isRunning(){
+        return this.roomState === "running";
+    }
+
+    gameFinished(){
+        return true;
+    }
+
+
 
 }
 
@@ -49,7 +65,10 @@ export class TeamRoom extends GameRoom{
         this.gameModeName = "TeamMode";
     }
 
+    gameFinished(){
 
+
+    }
 }
 
 
@@ -68,6 +87,12 @@ export class DefenceRoom extends GameRoom{
         super();
         this.playerLimit = playerLimit;
         this.gameModeName = "Defence";
+    }
+
+
+    gameFinished(){
+
+
     }
 
 }

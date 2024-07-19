@@ -311,5 +311,15 @@ export class MongoManager{
             .then().catch()
 
     }
-    
+
+    wipeGameRooms(){
+
+    }
+
+    wipeGameStates(){
+
+
+    }
+
+    addMessage(text, name, room){}
 }
