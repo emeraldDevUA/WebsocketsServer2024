@@ -5,7 +5,7 @@ export class GameRoom{
     playerLimit;
     gameModeName;
     roomState;
-    currentPlayer = 5;
+    currentPlayer = 0;
     static user_docs = [];
 
     constructor() {
@@ -18,10 +18,10 @@ export class GameRoom{
 
 
 
-    add_player(player){
+    add_player(player, room_name){
         // this.players.push(player);
         // GameRoom.mongo_reference.createNewGameSession("Teams", "T_1");
-        GameRoom.mongo_reference.addPlayer( "T_1",player);
+        GameRoom.mongo_reference.addPlayer( room_name,player);
         this.currentPlayer+=1;
     }
 

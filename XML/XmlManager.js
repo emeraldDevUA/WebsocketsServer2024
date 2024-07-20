@@ -65,7 +65,7 @@ export class XmlManager {
                                 break;
                             }
                         }
-                        _1vAllRooms[index].add_player(result.gameStartTask.name[0]);
+                        _1vAllRooms[index].add_player(`1VA_${index + 1}`,result.gameStartTask.name[0]);
                         _1vAllRooms[index].showStats();
                         ws_instance.send(`Room-id: 1VA_${index + 1}`);
 
@@ -83,7 +83,7 @@ export class XmlManager {
                         _1vAllRooms[index].showStats();
                         ws_instance.send(`Room-id: T_${index + 1}`);
                         console.log(result.gameStartTask.name[0]);
-                        _TeamRooms[index].add_player(result.gameStartTask.name[0]);
+                        _TeamRooms[index].add_player(`T_${index + 1}`,result.gameStartTask.name[0]);
                         _TeamRooms[index].showStats();
 
                         if (_TeamRooms[index].isReady()) {
@@ -99,7 +99,7 @@ export class XmlManager {
                         }
                         _1vAllRooms[index].add_player(result.gameStartTask.name[0]);
                         _1vAllRooms[index].showStats();
-                        _DefenceRooms[index].add_player(result.gameStartTask.name[0]);
+                        _DefenceRooms[index].add_player(`D_${index + 1}`,result.gameStartTask.name[0]);
                         _DefenceRooms[index].showStats();
 
                         ws_instance.send(`Room-id: D_${index + 1}`);
@@ -128,10 +128,10 @@ export class XmlManager {
 
                 // let room_id = result.gameBufferTask.nam[0];
                 let player_name = result.gameBufferTask.name[0];
-
+                let room_name = result.gameBufferTask.roomName[0];
                 mongo_reference.updateGameSession(coords, angles, player_name);
-
                 (mongo_reference.shareGameData("T_1"));
+
             }
             if (result.shellFiredTask != null) {
 

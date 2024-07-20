@@ -70,6 +70,13 @@ const vehicles =
         vehicle_id: ObjectId,
     });
 
+const chat_message =
+    new Schema({
+        name:{type:String},
+        text:{type:String},
+        game_room:{type:String},
+
+    });
 
 const _achievements = mongoose.model('achievements', achievements);
 const _player = mongoose.model('player', player);
@@ -295,13 +302,9 @@ export class MongoManager{
                             let msg = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><gameBufferTask><X>${pos[0]}</X><Y>${pos[1]}/Y><Z>${pos[2]}</Z><angleX>${angles[0]}</angleX><angleY>${angles[1]}</angleY><angleZ>${angles[2]}</angleZ><name>${pl_status.name}</name></gameBufferTask>`;
                             MongoManager.online_users.get(player_name).send(msg);
                         }) .catch()
-                })
-
-
+                });
             })
-            .catch()
-
-
+            .catch();
 
     }
 
@@ -313,13 +316,16 @@ export class MongoManager{
     }
 
     wipeGameRooms(){
-
+        _game_session.deleteMany({})
     }
 
     wipeGameStates(){
-
+        _game_status.deleteMany({});
 
     }
 
-    addMessage(text, name, room){}
+    addMessage(text, name, room){
+
+
+    }
 }
