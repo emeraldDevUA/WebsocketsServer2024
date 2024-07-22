@@ -4,9 +4,9 @@ import {_1VAll_Room, DefenceRoom, TeamRoom} from "../GameRooms/GameRoom.js";
 
 const maxRooms = 5;
 
-let _1vAllRooms = [new _1VAll_Room(maxRooms)];
-let _DefenceRooms = [new DefenceRoom(maxRooms * 2)];
-let _TeamRooms = [new TeamRoom(maxRooms)];
+export let _1vAllRooms = [new _1VAll_Room(maxRooms)];
+export let _DefenceRooms = [new DefenceRoom(maxRooms * 2)];
+export let _TeamRooms = [new TeamRoom(maxRooms)];
 
 
 export class XmlManager {
@@ -132,6 +132,15 @@ export class XmlManager {
                 mongo_reference.updateGameSession(coords, angles, player_name);
                 (mongo_reference.shareGameData("T_1"));
 
+                switch (room_name){
+                    case "T_1":
+                        if(!_TeamRooms[0].isRunning()) {
+
+                        }
+                        break;
+
+
+                }
             }
             if (result.shellFiredTask != null) {
 

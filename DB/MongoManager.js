@@ -328,4 +328,19 @@ export class MongoManager{
 
 
     }
+
+    async checkRoom(roomName){
+        _game_session.find({name: roomName}, {}, null)
+            .then(room =>{
+
+
+            })
+            .err(
+
+            )
+    }
+
+    optimizeRooms(){
+
+    }
 }
