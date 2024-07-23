@@ -1,6 +1,7 @@
 import mongoose, {Schema} from 'mongoose';
 import {ObjectId} from "mongodb";
 import {GameRoom} from "../GameRooms/GameRoom.js";
+import {_TeamRooms, XmlManager} from "../XML/XmlManager.js";
 
 
 const conn_url = 'mongodb://localhost:27017/tanksDB';
@@ -87,7 +88,7 @@ const _game_status = mongoose.model('game_status', game_status);
 const _game_session = mongoose.model('game_session',game_session);
 const _game_vehicle = mongoose.model('game_vehicle', game_vehicle);
 const _vehicles = mongoose.model('vehicles', vehicles);
-
+const _chat_message = mongoose.model('chat_message', chat_message);
 
 
 
@@ -97,7 +98,7 @@ export class MongoManager{
     constructor() {
 
         let t1 = Date.now();
-        mongoose.connect(conn_url, { })
+        mongoose.connect(conn_url, {})
             .then(function (){
                 let t2 = Date.now();
                 console.log(`Connection Successful. Connection delay: ${t2-t1} ms`);
@@ -117,15 +118,15 @@ export class MongoManager{
             })
     }
     async fetchCountryId(country_name) {
-
+        let cntry_id;
         await _country.findOne({name: country_name}, {}, null)
             .then(country => {
-                return country._id;
+                cntry_id = country._id;
             })
             .catch(err => {
                 console.log(err);
             })
-
+            return cntry_id;
     }
     registerUser(name, gmail, password, country){
         // create new achievements document
@@ -160,16 +161,14 @@ export class MongoManager{
             .catch(err=>{
                 console.log(err);
             })
-
-
     }
-    createNewGameSession(game_mode, session_name){
-        _game_mode.findOne({name: game_mode},{}, null)
+    async createNewGameSession(game_mode, session_name){
+        await _game_mode.findOne({name: game_mode},{}, null)
             .then(doc =>{
-
+                let array = [];
                 let gs = new _game_session({
                     game_mode_id: doc._id,
-                    player_list: [],
+                    player_list: array,
                     name: session_name
                 });
                 gs.save({}).then().catch();
@@ -228,12 +227,14 @@ export class MongoManager{
         _game_session.findOne({name:session_name},{}, null)
             .then(doc => {
                 let tmp = doc.player_list;
+                if(tmp == null){
+                    tmp = [];
+                }
                 tmp.push(player_name);
                 _game_session.findOneAndUpdate(
-                    {name:session_name},
+                      {name:session_name},
                     {player_list: tmp, game_mode_id: doc.game_mode_id},
                     null)
-
                     .then(folded_doc =>{
                         console.log(folded_doc);
                     }).catch();
@@ -270,7 +271,6 @@ export class MongoManager{
 
     }
 
-
     gameFinishMethod(room_name){
         let xml_doc = [];
         _game_session.findOne({name: room_name}, {}, null)
@@ -300,7 +300,11 @@ export class MongoManager{
                             let pos = pl_status.position;
                             let angles = pl_status.angles;
                             let msg = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><gameBufferTask><X>${pos[0]}</X><Y>${pos[1]}/Y><Z>${pos[2]}</Z><angleX>${angles[0]}</angleX><angleY>${angles[1]}</angleY><angleZ>${angles[2]}</angleZ><name>${pl_status.name}</name></gameBufferTask>`;
-                            MongoManager.online_users.get(player_name).send(msg);
+                            let user = MongoManager.online_users.get(player_name);
+                            if(user!=null){
+                                user.send(msg);
+                            }
+
                         }) .catch()
                 });
             })
@@ -325,19 +329,29 @@ export class MongoManager{
     }
 
     addMessage(text, name, room){
-
-
+           let msg =  new _chat_message({text: text, name: name, room: room});
+           msg.save({}).catch();
     }
 
     async checkRoom(roomName){
-        _game_session.find({name: roomName}, {}, null)
-            .then(room =>{
+        let cnt = 0;
+        await _game_session.find({name: roomName}, {}, null)
+            .then( room => {
+                let players = room.player_list;
 
+                const array =  players.forEach(player_name => {
+                    _game_status.find({name: player_name}, {}, null)
+                        .then(status => {})})
 
+                 array.forEach(element =>{if(element.hp >=0){
+                    cnt++;
+                }
+
+                 })
             })
-            .err(
+            .catch();
 
-            )
+        return cnt === 0;
     }
 
     optimizeRooms(){
