@@ -32,7 +32,7 @@ const game_session =
     new Schema({
         name:{type:String, unique:true},
         game_mode_id: ObjectId,
-        player_list: Array
+        player_list: [String]
     })
 
 const player =
@@ -51,10 +51,10 @@ const game_status =
     new Schema({
        status_name: String,
        hp: Number,
-       position: Array,
-       angles: Array,
-       turret_angles: Array,
-       gun_angles: Array,
+       position: [Number],
+       angles: [Number],
+       turret_angles: [Number],
+       gun_angles: [Number],
        name: String,
        team_name:String
     });
@@ -194,14 +194,14 @@ export class MongoManager{
         game_modes.forEach((game_mode_name) => {
             let game_mode_instance = new _game_mode({name: game_mode_name});
             game_mode_instance.save()
-                .then(doc=>{
+                .then(async doc => {
                     console.log(doc);
-                    if(game_mode_name === "Teams"){
+                    if (game_mode_name === "Teams") {
 
-                        this.createNewGameSession("Teams", "T_1");
-                    } else if(game_mode_name === "Defence"){
+                        await this.createNewGameSession("Teams", "T_1");
+                    } else if (game_mode_name === "Defence") {
 
-                        this.createNewGameSession("Defence", "D_1");
+                        await this.createNewGameSession("Defence", "D_1");
                     }
                 })
                 .catch(err =>{
@@ -223,19 +223,19 @@ export class MongoManager{
         })
 
     }
-    addPlayer(session_name, player_name){
-        _game_session.findOne({name:session_name},{}, null)
-            .then(doc => {
+    async addPlayer(session_name, player_name){
+        await _game_session.findOne({name:session_name},{}, null)
+            .then(async doc => {
                 let tmp = doc.player_list;
-                if(tmp == null){
+                if (tmp == null) {
                     tmp = [];
                 }
                 tmp.push(player_name);
-                _game_session.findOneAndUpdate(
-                      {name:session_name},
+                await _game_session.findOneAndUpdate(
+                    {name: session_name},
                     {player_list: tmp, game_mode_id: doc.game_mode_id},
                     null)
-                    .then(folded_doc =>{
+                    .then(folded_doc => {
                         console.log(folded_doc);
                     }).catch();
 
@@ -245,25 +245,27 @@ export class MongoManager{
             })
 
     }
-    gameStartMethod(room_name){
+    async gameStartMethod(room_name){
         // idk what params are supposed to be here
-        _game_session.findOne({name: room_name}, {}, null)
-            .then(doc => {
+        await _game_session.findOne({name: room_name}, {}, null)
+            .then(async doc => {
                 let array = doc.player_list;
                 console.log(doc.player_list);
-                array.forEach((player_name) => {
+                await array.forEach((player_name) => {
+                    let array = [+0, +0, +0];
                     MongoManager.online_users.get(player_name).send("Game Has Just Started!");
                     let gm_status = new _game_status({
                         status_name: "Alive",
                         hp: 100,
-                        position: [0,0,0],
+                        position: array,
                         name: player_name,
-                        turret_angles: [0,0,0],
-                        gun_angles: [0,0,0],
+                        turret_angles: array,
+                        gun_angles: array,
                         team_name: "Team1"
                     });
                     gm_status.save({}).then(
-                        r => {}
+                        r => {
+                        }
                     );
                 })
             })
@@ -291,30 +293,36 @@ export class MongoManager{
     }
     shareGameData(room_name) {
         _game_session.findOne({name: room_name}, {}, null)
-            .then(doc => {
+            .then(async doc => {
                 let array = doc.player_list;
-                array.forEach((player_name) => {
-                    _game_status.findOne({name: player_name}, {}, null)
-                        .then(pl_status =>{
+                await array.forEach((player_name) => {
+                    _game_status.find({name: player_name}, {}, null)
+                        .then( pl_status => {
                             console.log(pl_status);
-                            let pos = pl_status.position;
-                            let angles = pl_status.angles;
+                            let pos =  pl_status.position;
+                            let angles =  pl_status.angles;
+                            if(pos == null){
+                                pos = [0,0,0];
+                            }
+                            if(angles == null){
+                                angles = [0,0,0];
+                            }
                             let msg = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><gameBufferTask><X>${pos[0]}</X><Y>${pos[1]}/Y><Z>${pos[2]}</Z><angleX>${angles[0]}</angleX><angleY>${angles[1]}</angleY><angleZ>${angles[2]}</angleZ><name>${pl_status.name}</name></gameBufferTask>`;
                             let user = MongoManager.online_users.get(player_name);
-                            if(user!=null){
+                            if (user != null) {
                                 user.send(msg);
                             }
 
-                        }) .catch()
+                        }).catch()
                 });
             })
             .catch();
 
     }
 
-    updateGameSession(coords, angles, player_name){
+    updateGameSession(coords, angles, player_name, hp){
         _game_status.findOneAndUpdate({name: player_name},
-            {position: coords,angles: angles}, null)
+            {position: coords,angles: angles, hp:hp}, null)
             .then().catch()
 
     }
@@ -335,13 +343,17 @@ export class MongoManager{
 
     async checkRoom(roomName){
         let cnt = 0;
-        await _game_session.find({name: roomName}, {}, null)
-            .then( room => {
+         _game_session.findOne({name: roomName}, {}, null)
+            .then(  room => {
                 let players = room.player_list;
 
-                const array =  players.forEach(player_name => {
+                console.error(players);
+                const array = [];
+                players.forEach(player_name => {
                     _game_status.find({name: player_name}, {}, null)
-                        .then(status => {})})
+                        .then(status => {
+                            array.push(status)
+                        })})
 
                  array.forEach(element =>{if(element.hp >=0){
                     cnt++;

@@ -33,7 +33,7 @@ export class XmlManager {
             if (result.loginTask != null) {
 
                 console.log(`name : ${result.loginTask.name}`);
-                console.log(`encrypted password: ${result.loginTask.password}`);
+                console.log(`password: ${result.loginTask.password}`);
                 mongo_reference.checkLogin(result.loginTask.name[0], result.loginTask.password[0], ws_instance);
 
             }
@@ -42,7 +42,7 @@ export class XmlManager {
                 console.log("RegisterTask Received;");
                 console.log(`e-mail: ${result.registerTask.email}`);
                 console.log(`name : ${result.registerTask.name}`);
-                console.log(`encrypted password: ${result.registerTask.password}`);
+                console.log(`password: ${result.registerTask.password}`);
                 let cntry = await mongo_reference.fetchCountryId(result.registerTask.country[0]);
 
                 mongo_reference.registerUser(
@@ -79,15 +79,14 @@ export class XmlManager {
                                 break;
                             }
                         }
-                        _1vAllRooms[index].add_player(result.gameStartTask.name[0]);
-                        _1vAllRooms[index].showStats();
+                        index = 0;
                         ws_instance.send(`Room-id: T_${index + 1}`);
                         console.log(result.gameStartTask.name[0]);
-                        _TeamRooms[index].add_player(`T_${index + 1}`,result.gameStartTask.name[0]);
+                        _TeamRooms[index].add_player(result.gameStartTask.name[0], "T_1");
                         _TeamRooms[index].showStats();
 
                         if (_TeamRooms[index].isReady()) {
-                            mongo_reference.gameStartMethod(`T_${index + 1}`);
+                            mongo_reference.gameStartMethod(`T_1`);
                         }
 
                         break;
@@ -97,8 +96,6 @@ export class XmlManager {
                                 break;
                             }
                         }
-                        _1vAllRooms[index].add_player(result.gameStartTask.name[0]);
-                        _1vAllRooms[index].showStats();
                         _DefenceRooms[index].add_player(`D_${index + 1}`,result.gameStartTask.name[0]);
                         _DefenceRooms[index].showStats();
 
@@ -107,7 +104,7 @@ export class XmlManager {
                         _DefenceRooms[index].add_player(result.gameStartTask.name[0]);
                         _DefenceRooms[index].showStats();
                         if (_DefenceRooms[0].isReady()) {
-                            mongo_reference.gameStartMethod(`D_${index + 1}`);
+                            await mongo_reference.gameStartMethod(`D_${index + 1}`);
                         }
                         break;
                 }
@@ -128,28 +125,30 @@ export class XmlManager {
 
                 // let room_id = result.gameBufferTask.nam[0];
                 let player_name = result.gameBufferTask.name[0];
-                let room_name = result.gameBufferTask.roomName[0];
-                mongo_reference.updateGameSession(coords, angles, player_name);
-                (mongo_reference.shareGameData("T_1"));
+                let hp = +result.gameBufferTask.hp;
+                await mongo_reference.updateGameSession(coords, angles, player_name, hp);
+                await (mongo_reference.shareGameData("T_1"));
+//
+               let active_players = await mongo_reference.checkRoom("T_1");
 
-                switch (room_name){
-                    case "T_1":
-                        if(!_TeamRooms[0].isRunning()) {
-
-                        }
-                        break;
-
-
+                if(active_players){
+                   console.log("GG");
                 }
+
             }
             if (result.shellFiredTask != null) {
+                let mesh_name, X,Y,Z, angleX, angleY, angleZ, shell_speed;
 
             }
 
             if (result.messageSentTask != null) {
-
-
+                let msg, name, room;
+                msg =  result.messageSentTask.msg;
+                name =  result.messageSentTask.name;
+                room =  result.messageSentTask.room;
+                mongo_reference.addMessage(msg, name, room);
             }
+
 
         });
 
