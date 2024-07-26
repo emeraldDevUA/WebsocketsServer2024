@@ -307,7 +307,8 @@ export class MongoManager{
                             if(angles == null){
                                 angles = [0,0,0];
                             }
-                            let msg = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><gameBufferTask><X>${pos[0]}</X><Y>${pos[1]}/Y><Z>${pos[2]}</Z><angleX>${angles[0]}</angleX><angleY>${angles[1]}</angleY><angleZ>${angles[2]}</angleZ><name>${pl_status.name}</name></gameBufferTask>`;
+                            let msg = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><gameBufferTask><X>${pos[0]}</X><Y>${pos[1]}/Y><Z>${pos[2]}</Z><angleX>${angles[0]}</angleX><angleY>${angles[1]}</angleY><angleZ>${angles[2]}</angleZ><hp>${100}</hp><name>${player_name}</name></gameBufferTask>`;
+                            msg = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><gameBufferTask><X>0.0</X><Y>1.0</Y><Z>2.0</Z><angleX>0.0</angleX><angleY>1.0</angleY><angleZ>2.0</angleZ><hp>0.0</hp><name>name</name></gameBufferTask>";
                             let user = MongoManager.online_users.get(player_name);
                             if (user != null) {
                                 user.send(msg);
@@ -349,8 +350,10 @@ export class MongoManager{
         _game_session.deleteMany({})
     }
 
-    wipeGameStates(){
-        _game_status.deleteMany({});
+    wipeGameStates(playerName){
+        _game_status.deleteOne({name: playerName}).then(result =>{
+            console.log(result);
+        }).catch(err => {console.log(err)});
 
     }
 
@@ -370,12 +373,12 @@ export class MongoManager{
                 await players.forEach(player_name => {
                     _game_status.find({name: player_name}, {}, null)
                         .then(status => {
-                            array.push(status)
+                            array.push(status);
                         })
                 })
 
                await array.forEach(element => {
-                    if (element.hp >= 0) {
+                    if (element.hp > 0) {
                         cnt++;
                     }
 

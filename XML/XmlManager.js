@@ -128,13 +128,12 @@ export class XmlManager {
                 let hp = +result.gameBufferTask.hp;
                 await mongo_reference.updateGameSession(coords, angles, player_name, hp);
                 await (mongo_reference.shareGameData("T_1"));
-//
                let active_players = await mongo_reference.checkRoom("T_1");
 
                 if(active_players){
-                   console.log("GG");
-                   mongo_reference.shareMsg("T_1", "Game Over!");
-                 //  mongo_reference.wipeGameStates();
+                   //console.log("GG");
+                   //mongo_reference.shareMsg("T_1", "Game Over!");
+                   //mongo_reference.wipeGameStates();
                 }
 
             }
