@@ -70,7 +70,7 @@ export class XmlManager {
                         ws_instance.send(`Room-id: 1VA_${index + 1}`);
 
                         if (_1vAllRooms[0].isReady()) {
-                            mongo_reference.gameStartMethod(`1VA_${index + 1}`);
+                            await mongo_reference.gameStartMethod(`1VA_${index + 1}`);
                         }
                         break;
                     case 'Team':
@@ -82,11 +82,11 @@ export class XmlManager {
                         index = 0;
                         ws_instance.send(`Room-id: T_${index + 1}`);
                         console.log(result.gameStartTask.name[0]);
-                        _TeamRooms[index].add_player(result.gameStartTask.name[0], "T_1");
+                        _TeamRooms[index].add_player(result.gameStartTask.name[0], `T_${index + 1}`);
                         _TeamRooms[index].showStats();
 
                         if (_TeamRooms[index].isReady()) {
-                            mongo_reference.gameStartMethod(`T_1`);
+                            await mongo_reference.gameStartMethod(`T_${index + 1}`);
                         }
 
                         break;
@@ -133,6 +133,8 @@ export class XmlManager {
 
                 if(active_players){
                    console.log("GG");
+                   mongo_reference.shareMsg("T_1", "Game Over!");
+                 //  mongo_reference.wipeGameStates();
                 }
 
             }

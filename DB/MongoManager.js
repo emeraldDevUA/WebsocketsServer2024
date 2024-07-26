@@ -55,7 +55,7 @@ const game_status =
        angles: [Number],
        turret_angles: [Number],
        gun_angles: [Number],
-       name: String,
+       name: {type:String, unique:true},
        team_name:String
     });
 
@@ -320,6 +320,24 @@ export class MongoManager{
 
     }
 
+    shareMsg(room_name, msg) {
+        _game_session.findOne({name: room_name}, {}, null)
+            .then(async doc => {
+                let array = doc.player_list;
+                await array.forEach((player_name) => {
+                    _game_status.find({name: player_name}, {}, null)
+                        .then( pl_status => {
+                            let user = MongoManager.online_users.get(player_name);
+                            if (user != null) {
+                                user.send(msg);
+                            }
+                        }).catch()
+                });
+            })
+            .catch();
+
+    }
+
     updateGameSession(coords, angles, player_name, hp){
         _game_status.findOneAndUpdate({name: player_name},
             {position: coords,angles: angles, hp:hp}, null)
@@ -343,23 +361,25 @@ export class MongoManager{
 
     async checkRoom(roomName){
         let cnt = 0;
-         _game_session.findOne({name: roomName}, {}, null)
-            .then(  room => {
+         await _game_session.findOne({name: roomName}, {}, null)
+            .then(  async room => {
                 let players = room.player_list;
 
                 console.error(players);
                 const array = [];
-                players.forEach(player_name => {
+                await players.forEach(player_name => {
                     _game_status.find({name: player_name}, {}, null)
                         .then(status => {
                             array.push(status)
-                        })})
+                        })
+                })
 
-                 array.forEach(element =>{if(element.hp >=0){
-                    cnt++;
-                }
+               await array.forEach(element => {
+                    if (element.hp >= 0) {
+                        cnt++;
+                    }
 
-                 })
+                })
             })
             .catch();
 
